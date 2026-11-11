@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scientific Calculator | Neon</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#030506;--panel:#090d10;--screen:#020708;
+  --key:#101719;--key2:#172326;--accent:#00ffc3;
+  --accent2:#00d9ff;--text:#eafff9;--muted:#6f918b;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;padding:22px;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(ellipse at 50% 0%,#06382e55 0,transparent 42%),
+    radial-gradient(ellipse at 100% 100%,#003b4a33 0,transparent 38%),
+    #030506;
+  color:var(--text);font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif;
+}
+.calculator{
+  width:min(100%,420px);position:relative;overflow:hidden;
+  padding:20px;border-radius:24px;
+  background:linear-gradient(145deg,#0c1214,#070b0d 65%);
+  border:1px solid #17483f;
+  box-shadow:0 0 0 1px #00ffc30b,0 18px 65px #000,
+             0 0 38px #00ffc315,inset 0 1px #ffffff0b;
+}
+.calculator:before{
+  content:"";position:absolute;inset:0 18% auto;height:1px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  opacity:.8;
+}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.brand{font-size:11px;letter-spacing:3px;color:var(--accent);font-weight:800;text-shadow:0 0 12px #00ffc366}
+.mode{
+  border:1px solid #176657;background:#071a17;color:var(--accent);
+  border-radius:9px;padding:8px 13px;cursor:pointer;font-weight:800;
+  box-shadow:inset 0 0 12px #00ffc310,0 0 12px #00ffc310;
+}
+.screen{
+  background:linear-gradient(145deg,#020908,#050d10);
+  border:1px solid #17483f;border-radius:17px;padding:17px 16px;
+  margin-bottom:17px;min-height:120px;display:flex;flex-direction:column;
+  justify-content:space-between;overflow:hidden;
+  box-shadow:inset 0 0 28px #00ffc308,0 0 20px #00ffc30b;
+}
+.expression{min-height:25px;color:#77a69b;font-size:16px;text-align:right;overflow-wrap:anywhere}
+.result{
+  font-size:clamp(30px,8vw,41px);font-weight:650;text-align:right;
+  overflow-wrap:anywhere;min-height:49px;color:#f0fff9;
+  text-shadow:0 0 18px #00ffc333;
+}
+.scientific-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:12px;padding-bottom:14px;border-bottom:1px solid #17352f}
+.main-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+button.key{
+  min-width:0;height:55px;border:1px solid #1c302e;border-radius:12px;
+  background:linear-gradient(145deg,#121c1d,#0b1113);color:var(--text);
+  font-size:16px;font-weight:650;cursor:pointer;
+  box-shadow:0 3px 0 #050909,0 5px 12px #0007;
+  transition:transform .12s,border-color .12s,box-shadow .12s,background .12s;
+}
+button.key:hover{
+  background:linear-gradient(145deg,#172725,#0d1918);
+  border-color:#00a987;box-shadow:0 0 15px #00ffc326,0 3px 0 #050909;
+  transform:translateY(-1px)
+}
+button.key:active{transform:translateY(1px);box-shadow:0 1px 0 #050909}
+.function{color:#79dccc!important;background:linear-gradient(145deg,#10201f,#0a1314)!important;border-color:#1b4840!important}
+.operator{color:var(--accent)!important;background:linear-gradient(145deg,#102a25,#091815)!important;border-color:#176354!important;text-shadow:0 0 10px #00ffc355}
+.danger{color:#ff6685!important;background:linear-gradient(145deg,#291219,#160b10)!important;border-color:#54202e!important}
+.equals{
+  background:linear-gradient(135deg,#00ffc3,#00cfa8)!important;color:#00130e!important;
+  border-color:#73ffe0!important;font-size:22px!important;
+  box-shadow:0 0 20px #00ffc344,0 3px 0 #007e68!important;
+}
+.equals:hover{background:linear-gradient(135deg,#73ffe0,#00e6b3)!important;box-shadow:0 0 26px #00ffc377!important}
+.zero{grid-column:span 2}
+.footer{color:#54766f;font-size:10px;letter-spacing:.7px;text-align:center;margin-top:17px}
+@media(max-width:370px){
+  .calculator{padding:14px}
+  .scientific-grid,.main-grid{gap:6px}
+  button.key{height:49px;font-size:14px}
+}
+</style>
+</head>
+<body>
+<main class="calculator">
+  <div class="top"><div class="brand">SCIENTIFIC CALCULATOR</div><button class="mode" id="angleMode" onclick="toggleMode()">DEG</button></div>
+  <section class="screen">
+    <div class="expression" id="expression">Ready</div>
+    <div class="result" id="result">0</div>
+  </section>
+  <section class="scientific-grid">
+    <button class="key function" onclick="insert('sin(')">sin</button>
+    <button class="key function" onclick="insert('cos(')">cos</button>
+    <button class="key function" onclick="insert('tan(')">tan</button>
+    <button class="key function" onclick="insert('^')">xʸ</button>
+    <button class="key function" onclick="insert('√(')">√</button>
+
+    <button class="key function" onclick="insert('asin(')">sin⁻¹</button>
+    <button class="key function" onclick="insert('acos(')">cos⁻¹</button>
+    <button class="key function" onclick="insert('atan(')">tan⁻¹</button>
+    <button class="key function" onclick="insert('log(')">log</button>
+    <button class="key function" onclick="insert('ln(')">ln</button>
+
+    <button class="key function" onclick="insert('!')">x!</button>
+    <button class="key function" onclick="insert('π')">π</button>
+    <button class="key function" onclick="insert('e')">e</button>
+    <button class="key function" onclick="insert('Ans')">Ans</button>
+    <button class="key function" onclick="insert('^2')">x²</button>
+  </section>
+  <section class="main-grid">
+    <button class="key danger" onclick="clearAll()">AC</button>
+    <button class="key danger" onclick="backspace()">DEL</button>
+    <button class="key function" onclick="insert('%')">%</button>
+    <button class="key operator" onclick="insert('÷')">÷</button>
+
+    <button class="key" onclick="insert('7')">7</button>
+    <button class="key" onclick="insert('8')">8</button>
+    <button class="key" onclick="insert('9')">9</button>
+    <button class="key operator" onclick="insert('×')">×</button>
+
+    <button class="key" onclick="insert('4')">4</button>
+    <button class="key" onclick="insert('5')">5</button>
+    <button class="key" onclick="insert('6')">6</button>
+    <button class="key operator" onclick="insert('−')">−</button>
+
+    <button class="key" onclick="insert('1')">1</button>
+    <button class="key" onclick="insert('2')">2</button>
+    <button class="key" onclick="insert('3')">3</button>
+    <button class="key operator" onclick="insert('+')">+</button>
+
+    <button class="key function" onclick="insert('(')">(</button>
+    <button class="key" onclick="insert('0')">0</button>
+    <button class="key function" onclick="insert('.')">.</button>
+    <button class="key function" onclick="insert(')')">)</button>
+
+    <button class="key function" onclick="insert('abs(')">|x|</button>
+    <button class="key function" onclick="insert('floor(')">⌊x⌋</button>
+    <button class="key function" onclick="insert('ceil(')">⌈x⌉</button>
+    <button class="key equals" onclick="calculate()">=</button>
+  </section>
+  <div class="footer">Keyboard supported · Enter to calculate · Esc to clear</div>
+</main>
+<script>
+let expr='',ans=0,deg=true;
+const expEl=document.getElementById('expression'),resEl=document.getElementById('result');
+function paint(){expEl.textContent=expr||'Ready';}
+function insert(v){expr+=v;paint();}
+function clearAll(){expr='';resEl.textContent='0';paint();}
+function backspace(){expr=expr.slice(0,-1);paint();}
+function toggleMode(){deg=!deg;document.getElementById('angleMode').textContent=deg?'DEG':'RAD';}
+function tokenize(s){
+ s=s.replaceAll('×','*').replaceAll('÷','/').replaceAll('−','-').replaceAll('π','pi').replaceAll('√','sqrt');
+ const re=/\s*(asin|acos|atan|sin|cos|tan|sqrt|log|ln|abs|floor|ceil|Ans|pi|e|(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?|[()+\-*/^%!])/gy;
+ let out=[],i=0;
+ while(i<s.length){re.lastIndex=i;let m=re.exec(s);if(!m)throw Error('Invalid input');out.push(m[1]);i=re.lastIndex;}
+ // implicit multiplication: 2pi, 2(3), (2)(3), 2sin(...)
+ let fixed=[];
+ const isEnd=t=>/^(?:\d|pi$|e$|Ans$|\))/.test(t);
+ const isStart=t=>/^(?:\(|pi$|e$|Ans$|sin$|cos$|tan$|asin$|acos$|atan$|sqrt$|log$|ln$|abs$|floor$|ceil$)/.test(t);
+ for(let j=0;j<out.length;j++){if(j&&isEnd(fixed[fixed.length-1])&&isStart(out[j]))fixed.push('*');fixed.push(out[j]);}
+ return fixed;
+}
+function toRpn(tokens){
+ let out=[],ops=[],prec={'!':5,'^':4,'u-':3,'*':2,'/':2,'%':2,'+':1,'-':1};
+ const funcs=['sin','cos','tan','asin','acos','atan','sqrt','log','ln','abs','floor','ceil'];
+ let prev=null;
+ for(let t of tokens){
+  if(!isNaN(Number(t))||['pi','e','Ans'].includes(t)){out.push(t);}
+  else if(funcs.includes(t)){ops.push(t);}
+  else if(t==='('){ops.push(t);}
+  else if(t===')'){while(ops.length&&ops.at(-1)!=='(')out.push(ops.pop());if(!ops.length)throw Error('Mismatched brackets');ops.pop();if(funcs.includes(ops.at(-1)))out.push(ops.pop());}
+  else{
+   if(t==='-'&&(!prev||['(','+','-','*','/','^','%'].includes(prev)))t='u-';
+   if(t==='!'){out.push(t);prev=t;continue;}
+   while(ops.length&&ops.at(-1)!=='('&&(prec[ops.at(-1)]>prec[t]||(prec[ops.at(-1)]===prec[t]&&t!=='^')))out.push(ops.pop());
+   ops.push(t);
+  }prev=t;
+ }
+ while(ops.length){let x=ops.pop();if(x==='(')throw Error('Mismatched brackets');out.push(x);}return out;
+}
+function evaluate(s){
+ let rpn=toRpn(tokenize(s)),st=[];
+ const pop=()=>{if(!st.length)throw Error('Check expression');return st.pop();};
+ for(let t of rpn){
+  if(!isNaN(Number(t)))st.push(Number(t));
+  else if(t==='pi')st.push(Math.PI);else if(t==='e')st.push(Math.E);else if(t==='Ans')st.push(ans);
+  else if(t==='u-')st.push(-pop());
+  else if(t==='!'){let n=pop();if(n<0||n>170||!Number.isInteger(n))throw Error('Factorial needs an integer from 0 to 170');let v=1;for(let i=2;i<=n;i++)v*=i;st.push(v);}
+  else if(['sin','cos','tan','asin','acos','atan','sqrt','log','ln','abs','floor','ceil'].includes(t)){
+   let x=pop(),a=deg?Math.PI/180:1,v;
+   if(t==='sin')v=Math.sin(x*a);else if(t==='cos')v=Math.cos(x*a);else if(t==='tan')v=Math.tan(x*a);
+   else if(t==='asin')v=Math.asin(x)/a;else if(t==='acos')v=Math.acos(x)/a;else if(t==='atan')v=Math.atan(x)/a;
+   else if(t==='sqrt')v=Math.sqrt(x);else if(t==='log')v=Math.log10(x);else if(t==='ln')v=Math.log(x);else if(t==='abs')v=Math.abs(x);else if(t==='floor')v=Math.floor(x);else v=Math.ceil(x);st.push(v);
+  }else{let b=pop(),a=pop();if(t==='+')st.push(a+b);if(t==='-')st.push(a-b);if(t==='*')st.push(a*b);if(t==='/')st.push(a/b);if(t==='%')st.push(a%b);if(t==='^')st.push(a**b);}
+ }
+ if(st.length!==1)throw Error('Check expression');if(!Number.isFinite(st[0]))throw Error('Math error');return st[0];
+}
+function calculate(){if(!expr)return;try{let v=evaluate(expr);ans=v;expEl.textContent=expr+' =';resEl.textContent=Number(v.toPrecision(12)).toString();expr=String(v); }catch(e){resEl.textContent=e.message;}}
+document.addEventListener('keydown',e=>{if(/^[0-9.]$/.test(e.key)){insert(e.key);}else if(['+','-','*','/','(',')','%','^'].includes(e.key)){insert(e.key);}else if(e.key==='Enter'||e.key==='='){e.preventDefault();calculate();}else if(e.key==='Backspace')backspace();else if(e.key==='Escape')clearAll();});
+</script>
+</body>
+</html>
